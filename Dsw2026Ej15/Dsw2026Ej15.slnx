@@ -1,4 +1,9 @@
 <Solution>
+<<<<<<< HEAD
   <Project Path="Dsw2026Ej15.Data/Dsw2026Ej15.Data.csproj" Id="81d43801-c51d-4d86-bbeb-fd5a63bb8ab7" />
   <Project Path="Dsw2026Ej15/Dsw2026Ej15.Api.csproj" />
+=======
+  <Project Path="Dsw2026Ej15.Domain/Dsw2026Ej15.Domain.csproj" />
+  <Project Path="Dsw2026Ej15/Dsw2026Ej15.csproj" />
+>>>>>>> development
 </Solution>

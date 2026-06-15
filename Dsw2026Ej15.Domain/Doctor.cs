@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Dsw2026Ej15.Domain
 {
-    internal class Doctor : BaseEntity
+    public class Doctor : BaseEntity
     {
 
         public string Name { get; set; }
@@ -12,7 +12,7 @@ namespace Dsw2026Ej15.Domain
         public bool IsActive { get; set; }
         public Speciality Speciality { get; set; }
 
-        public Doctor(Guid id, string name, string licenseNumber, bool isActive, Speciality speciality) : base (id)
+        public Doctor(Guid? id, string name, string licenseNumber, bool isActive, Speciality speciality) : base (id)
         {
             Name = name;
             LicenseNumber = licenseNumber;

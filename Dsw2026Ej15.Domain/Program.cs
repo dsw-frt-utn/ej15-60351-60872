@@ -1,4 +1,6 @@
-﻿namespace Dsw2026Ej15.Domain
+﻿using Dsw2026Ej15.Domain;
+
+namespace Dsw2026Ej15
 {
     public class Program
     {

@@ -2,6 +2,7 @@ using Dsw2026Ej15.Api.Models;
 using Dsw2026Ej15.Domain.Entities;
 using Dsw2026Ej15.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Dsw2026Ej15.Domain.Exceptions;
 
 namespace Dsw2026Ej15.Api.Controllers
 {
@@ -19,14 +20,14 @@ namespace Dsw2026Ej15.Api.Controllers
         {
             if (string.IsNullOrWhiteSpace(request.Name) || string.IsNullOrWhiteSpace(request.LicenseNumber))
             {
-                return BadRequest("Nombre y matricula son requeridos");
+                throw new ValidationException("Nombre y matricula son requeridos"); 
             }
 
             var speciality = _persistence.GetSpecialityById(request.SpecialityId);
 
             if (speciality == null)
             {
-                return BadRequest("La especialidad no existe");
+                throw new ValidationException("La especialidad no existe");
             }
 
             var doctor = new Doctor(request.Name, request.LicenseNumber, speciality);
@@ -38,7 +39,7 @@ namespace Dsw2026Ej15.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetDoctors()
         {
-            var doctors = _persistence.GetDoctor().Where(d => d.IsActive);
+            var doctors = _persistence.GetDoctor().Select(d => new DoctorModel.Response(d.Id, d.Name, d.LicenseNumber, d.Speciality.Name)); ;
 
             return Ok(doctors);
         }
@@ -50,15 +51,10 @@ namespace Dsw2026Ej15.Api.Controllers
 
             if (doctor is null || !doctor.IsActive)
             {
-                return BadRequest("El medico no fue encontrado");
+                throw new ValidationException("El medico no fue encontrado");
             }
 
-            var response = new DoctorModel.Response
-            (
-                doctor.Name,
-                doctor.LicenseNumber,
-                doctor.Speciality.Name
-            );
+            var response = new DoctorModel.Response(doctor.Id, doctor.Name, doctor.LicenseNumber, doctor.Speciality.Name);
 
             return Ok(response);
         }
@@ -70,7 +66,7 @@ namespace Dsw2026Ej15.Api.Controllers
 
             if (doctor is null || doctor.IsActive == false)
             {
-                return BadRequest("El medico no esta activo o no fue encontrado");
+                throw new ValidationException("El medico no esta activo o no fue encontrado");
             }
 
             _persistence.DeleteDoctor(doctor);

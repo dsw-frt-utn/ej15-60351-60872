@@ -1,5 +1,6 @@
-using Dsw2026Ej15.Domain.Interfaces;
+using Dsw2026Ej15.Api.Middleware;
 using Dsw2026Ej15.Data;
+using Dsw2026Ej15.Domain.Interfaces;
 
 namespace Dsw2026Ej15
 {
@@ -12,6 +13,7 @@ namespace Dsw2026Ej15
             builder.Services.AddControllers();
             builder.Services.AddSwaggerGen();
             builder.Services.AddSingleton<IPersistence, PersistenceInMemory>();
+            builder.Services.AddHealthChecks();
             //var services = new ServiceCollection();
 
             var app = builder.Build();
@@ -25,6 +27,9 @@ namespace Dsw2026Ej15
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            app.UseMiddleware<ExceptionMiddleware>();
+            app.MapHealthChecks("/health-check");
 
             app.UseAuthorization();
 

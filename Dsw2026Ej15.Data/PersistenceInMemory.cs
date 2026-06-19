@@ -41,7 +41,7 @@ namespace Dsw2026Ej15.Data
             return _specialities.SingleOrDefault(s => s.Id == id);
         }
 
-        public IEnumerable<Doctor> GetDoctor() => _doctors;
+        public IEnumerable<Doctor> GetDoctor() => _doctors.Where(d => d.IsActive);
 
         public Doctor? GetDoctorById(Guid id)
         {

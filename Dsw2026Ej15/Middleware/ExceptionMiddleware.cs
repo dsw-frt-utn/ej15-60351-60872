@@ -1,18 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Text;
+using System.Text.Json;
+using Dsw2026Ej15.Domain.Exceptions;
 
 namespace Dsw2026Ej15.Api.Middleware
 {
     public class ExceptionMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly ILogger<ExceptionMiddleware> _logger;
 
-        public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
+        public ExceptionMiddleware(RequestDelegate next)
         {
             _next = next;
-            _logger = logger;
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -21,26 +22,25 @@ namespace Dsw2026Ej15.Api.Middleware
             {
                 await _next(context);
             }
-            catch (ValidationException ex)
+            catch (Exception ex) 
             {
-                _logger.LogWarning(ex, "Error de validacion: {Message}", ex.Message);
-
-                context.Response.StatusCode = StatusCodes.Status400BadRequest;
-                context.Response.ContentType = "application/json";
-
-                var response = new { message = ex.Message };
-                await context.Response.WriteAsJsonAsync(response);
+                await HandleExceptionAsync(context,ex);
             }
-            catch (Exception ex)
+
+        }
+        public async Task HandleExceptionAsync(HttpContext context,Exception ex)
+        {
+            HttpStatusCode status = HttpStatusCode.InternalServerError;
+            string message = "Ocurrio un error inesperado al ejecutar la solicitud";
+            if(ex is ValidationException ve)
             {
-                _logger.LogError(ex, "Error inesperado: {Message}", ex.Message);
-
-                context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-                context.Response.ContentType = "application/json";
-
-                var response = new { message = "A ocurrido un error inesperado. Por favor volver mas tarde" };
-                await context.Response.WriteAsJsonAsync(response);
+                status = HttpStatusCode.BadRequest;
+                message = ve.Message;
             }
+            var result = JsonSerializer.Serialize(new { error = message });
+            context.Response.ContentType = "application/json";
+            context.Response.StatusCode = (int)status;
+            await context.Response.WriteAsync(result);
         }
     }
 }

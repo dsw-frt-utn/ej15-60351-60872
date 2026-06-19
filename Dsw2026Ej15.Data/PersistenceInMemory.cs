@@ -1,16 +1,15 @@
-﻿using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Collections.Generic;
-using Dsw2026Ej15.Domain;
+using Dsw2026Ej15.Domain.Entities;
+using Dsw2026Ej15.Domain.Interfaces;
+using Dsw2026Ej15.Data.Dtos;
 
 namespace Dsw2026Ej15.Data
 {
-    internal class PersistenceInMemory : IPercistence
+    public class PersistenceInMemory : IPersistence
     {
-        private readonly List<Doctor> _doctors = new List<Doctor>();
-        private readonly List<Speciality> _specialities = new List<Speciality>();
+        private List<Doctor> _doctors = [];
+        private List<Speciality> _specialities = [];
 
         public PersistenceInMemory()
         {
@@ -19,60 +18,46 @@ namespace Dsw2026Ej15.Data
 
         private void LoadSpecialities()
         {
-            string filePath = "specialities.json";
-
-            if (File.Exists(filePath))
+            try
             {
-                string jsonString = File.ReadAllText(filePath);
-
-                var list = JsonSerializer.Deserialize<List<Speciality>>(jsonString, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
-
-                if (list != null)
-                {
-                    _specialities.AddRange(list);
-                }
+                string jsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
+                    "Sources", "specialities.json");
+                var json = File.ReadAllText(jsonPath);
+                var specialities = JsonSerializer.Deserialize<List<SpecialityDto>>(json,
+                    new JsonSerializerOptions()
+                    {
+                        PropertyNameCaseInsensitive = true
+                    }) ?? [];
+                _specialities = [.. specialities.Select(s => new Speciality(s.id, s.Name, s.Description))];
             }
-            else
+            catch(Exception)
             {
-                _specialities.Add(new Speciality(Guid.NewGuid(),"General","Descripcion general"));
-            }
-        }
 
-        public IEnumerable<Speciality> GetSpecialities()
-        {
-            return _specialities;
+            }
         }
 
         public Speciality? GetSpecialityById(Guid id)
         {
-            return _specialities.FirstOrDefault(s => s.Id == id);
+            return _specialities.SingleOrDefault(s => s.Id == id);
         }
 
-        public IEnumerable<Doctor> GetDoctor()
-        {
-            return _doctors;
-        }
+        public IEnumerable<Doctor> GetDoctor() => _doctors;
 
         public Doctor? GetDoctorById(Guid id)
         {
-            return _doctors.FirstOrDefault(d => d.Id == id);
+            return _doctors.SingleOrDefault(d => d.Id == id);
         }
 
-        public void AddDoctor(Doctor doctor)
-        {
-            _doctors.Add(doctor);
-        }
+        public void AddDoctor(Doctor doctor) => _doctors.Add(doctor);
 
-        public bool DeleteDoctor(Guid id)
+        public void DeleteDoctor(Doctor doctor)
         {
-            var doctor = GetDoctorById(id);
-            if (doctor == null) return false;
+            var index = _doctors.FindIndex(d => d.Id == doctor.Id);
 
-            _doctors.Remove(doctor);
-            return true;
+            if (index >= 0)
+            {
+                _doctors[index].IsActive = false;
+            }
         }
     }
 }

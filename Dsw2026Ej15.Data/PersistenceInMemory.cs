@@ -36,27 +36,27 @@ namespace Dsw2026Ej15.Data
             }
         }
 
-        public Speciality? GetSpecialityById(Guid id)
+        public async Task <Speciality?> GetSpecialityById(Guid id)
         {
             return _specialities.SingleOrDefault(s => s.Id == id);
         }
 
-        public IEnumerable<Doctor> GetDoctor() => _doctors.Where(d => d.IsActive);
+        public async Task <IEnumerable<Doctor>> GetDoctor() => _doctors.Where(d => d.IsActive);
 
-        public Doctor? GetDoctorById(Guid id)
+        public async Task <Doctor?> GetDoctorById(Guid id)
         {
             return _doctors.SingleOrDefault(d => d.Id == id);
         }
 
-        public void AddDoctor(Doctor doctor) => _doctors.Add(doctor);
+        public async Task AddDoctor(Doctor doctor) => _doctors.Add(doctor);
 
-        public void DeleteDoctor(Doctor doctor)
+        public async Task DeleteDoctor(Doctor doctor)
         {
             var index = _doctors.FindIndex(d => d.Id == doctor.Id);
 
             if (index >= 0)
             {
-                _doctors[index].IsActive = false;
+                _doctors[index].Deactivate();
             }
         }
     }

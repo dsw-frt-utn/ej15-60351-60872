@@ -23,7 +23,7 @@ namespace Dsw2026Ej15.Api.Controllers
                 throw new ValidationException("Nombre y matricula son requeridos"); 
             }
 
-            var speciality = _persistence.GetSpecialityById(request.SpecialityId);
+            var speciality = await _persistence.GetSpecialityById(request.SpecialityId);
 
             if (speciality == null)
             {
@@ -31,7 +31,7 @@ namespace Dsw2026Ej15.Api.Controllers
             }
 
             var doctor = new Doctor(request.Name, request.LicenseNumber, speciality);
-            _persistence.AddDoctor(doctor);
+            await _persistence.AddDoctor(doctor);
 
             return Created();
         }
@@ -39,15 +39,16 @@ namespace Dsw2026Ej15.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetDoctors()
         {
-            var doctors = _persistence.GetDoctor().Select(d => new DoctorModel.Response(d.Id, d.Name, d.LicenseNumber, d.Speciality.Name)); ;
+            var doctorsRaw = await _persistence.GetDoctor();
+            var doctors = doctorsRaw.Select(d => new DoctorModel.Response(d.Id, d.Name, d.LicenseNumber, d.Speciality.Name));
 
             return Ok(doctors);
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetDoctorById(Guid id)
+        public async Task<IActionResult> GetDoctorById([FromRoute]Guid id)
         {
-            var doctor = _persistence.GetDoctorById(id);
+            var doctor = await _persistence.GetDoctorById(id);
 
             if (doctor is null || !doctor.IsActive)
             {
@@ -60,16 +61,16 @@ namespace Dsw2026Ej15.Api.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteDoctor(Guid id)
+        public async Task<IActionResult> DeleteDoctor([FromRoute] Guid id)
         {
-            var doctor = _persistence.GetDoctorById(id);
+            var doctor = await _persistence.GetDoctorById(id);
 
             if (doctor is null || doctor.IsActive == false)
             {
                 throw new ValidationException("El medico no esta activo o no fue encontrado");
             }
 
-            _persistence.DeleteDoctor(doctor);
+           await  _persistence.DeleteDoctor(doctor);
 
             return NoContent();
         }

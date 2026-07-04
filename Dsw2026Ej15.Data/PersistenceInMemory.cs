@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using System.Collections.Generic;
 using Dsw2026Ej15.Domain.Entities;
 using Dsw2026Ej15.Domain.Interfaces;
 using Dsw2026Ej15.Data.Dtos;
@@ -16,6 +15,37 @@ namespace Dsw2026Ej15.Data
             LoadSpecialities();
         }
 
+        public async Task<IEnumerable<Doctor>> GetAllDoctor()
+        {
+            return _doctors.Where(d => d.IsActive);
+        }
+
+        public async Task<Doctor?> GetDoctorById(Guid id)
+        {
+            return _doctors.SingleOrDefault(d => d.Id == id && d.IsActive);
+        }
+
+        public async Task<Speciality?> GetSpecialityById(Guid id)
+        {
+            return _specialities.SingleOrDefault(e => e.Id == id);
+        }
+
+        public async Task<Speciality> GetSpecialityById(Guid? specialityId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task SaveDoctor(Doctor doctor)
+        {
+            _doctors.Add(doctor);
+        }
+
+        public async Task UpdateDoctor(Doctor doctor)
+        {
+            _doctors.Remove(doctor);
+            _doctors.Add(doctor);
+        }
+
         private void LoadSpecialities()
         {
             try
@@ -30,33 +60,9 @@ namespace Dsw2026Ej15.Data
                     }) ?? [];
                 _specialities = [.. specialities.Select(s => new Speciality(s.id, s.Name, s.Description))];
             }
-            catch(Exception)
+            catch (Exception)
             {
 
-            }
-        }
-
-        public Speciality? GetSpecialityById(Guid id)
-        {
-            return _specialities.SingleOrDefault(s => s.Id == id);
-        }
-
-        public IEnumerable<Doctor> GetDoctor() => _doctors.Where(d => d.IsActive);
-
-        public Doctor? GetDoctorById(Guid id)
-        {
-            return _doctors.SingleOrDefault(d => d.Id == id);
-        }
-
-        public void AddDoctor(Doctor doctor) => _doctors.Add(doctor);
-
-        public void DeleteDoctor(Doctor doctor)
-        {
-            var index = _doctors.FindIndex(d => d.Id == doctor.Id);
-
-            if (index >= 0)
-            {
-                _doctors[index].IsActive = false;
             }
         }
     }

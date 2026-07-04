@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Security.Authentication;
 using System.Text;
 using System.Text.Json;
 using Dsw2026Ej15.Domain.Exceptions;
@@ -28,14 +29,28 @@ namespace Dsw2026Ej15.Api.Middleware
             }
 
         }
-        public async Task HandleExceptionAsync(HttpContext context,Exception ex)
+        public async Task HandleExceptionAsync(HttpContext context, Exception ex)
         {
-            HttpStatusCode status = HttpStatusCode.InternalServerError;
-            string message = "Ocurrio un error inesperado al ejecutar la solicitud";
-            if(ex is ValidationException ve)
+            HttpStatusCode status;
+            string message;
+            switch (ex)
             {
-                status = HttpStatusCode.BadRequest;
-                message = ve.Message;
+                case ValidationException:
+                    status = HttpStatusCode.BadRequest;
+                    message = ex.Message;
+                    break;
+                case EntityNotFoundException:
+                    status = HttpStatusCode.BadRequest;
+                    message = ex.Message;
+                    break;
+                case AuthenticationException:
+                    status = HttpStatusCode.BadRequest;
+                    message = ex.Message;
+                    break;
+                default:
+                    status = HttpStatusCode.InternalServerError;
+                    message = "Ocurrió un error inesperado al ejecutar la solicitud";
+                    break;
             }
             var result = JsonSerializer.Serialize(new { error = message });
             context.Response.ContentType = "application/json";

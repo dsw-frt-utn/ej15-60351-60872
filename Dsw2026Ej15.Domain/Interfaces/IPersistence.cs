@@ -1,13 +1,12 @@
 ﻿using Dsw2026Ej15.Domain.Entities;
 
-namespace Dsw2026Ej15.Domain.Interfaces
+namespace Dsw2026Ej15.Domain.Interfaces;
+
+public interface IPersistence
 {
-    public interface IPersistence
-    {
-        Speciality? GetSpecialityById(Guid id);
-        IEnumerable<Doctor> GetDoctor();
-        Doctor? GetDoctorById(Guid id);
-        void AddDoctor(Doctor doctor);
-        void DeleteDoctor(Doctor doctor);
-    }
+    Task<IEnumerable<Doctor>> GetAllDoctor();
+    Task<Doctor?> GetDoctorById(Guid id);
+    Task<Speciality?> GetSpecialityById(Guid id);
+    Task SaveDoctor(Doctor doctor);
+    Task UpdateDoctor(Doctor doctor);
 }
